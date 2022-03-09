@@ -1,0 +1,7 @@
+<main class="content__wrap">
+    <app-authorization-window (errorLogin)="getError($event)"></app-authorization-window>
+    <div class="content__notification" 
+    [ngClass]="{display: displayErrorNotification}">
+        <app-notification-error [message]="errorMesageString" (closeWindow)="hideErrorNotification($event)"></app-notification-error>
+    </div>
+</main>
