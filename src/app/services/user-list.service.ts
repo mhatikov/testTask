@@ -38,27 +38,8 @@ export class UserListService {
   }
 
   getUsersToFiltersKey$(token: string, filtersKey: number|null): Observable<ServerError|Customer[]>{
-    if(filtersKey === 0) return this._getUsersPipe(this.getAllActiveUsersList$(token));
-    if(filtersKey === 2) return this._getUsersPipe(this.getAllBlockedUsersList$(token));
-    return this._getUsersPipe(this.getAllUsersList$(token));
-  }
-
-  private _getUsersPipe(observer: Observable<ServerError|Customer[]>): Observable<Customer[]>{
-    return observer.pipe(
-      map(result => {
-        if(!Array.isArray(result)){
-          throw new ServerError(result.message);
-        }
-        return result.sort((a,b) => {
-          if(a.id > b.id) return -1;
-          if(a.id < b.id) return 1;
-          return 0
-        }).reverse();
-      }),
-      retryWhen(err => err.pipe(
-        delayWhen(() => timer(5000)),
-        tap(() => console.log('reconnect...'))
-      ))
-    )
+    if(filtersKey === 0) return this.getAllActiveUsersList$(token);
+    if(filtersKey === 2) return this.getAllBlockedUsersList$(token);
+    return this.getAllUsersList$(token);
   }
 }

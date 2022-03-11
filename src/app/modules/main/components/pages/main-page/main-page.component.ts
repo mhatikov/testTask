@@ -9,6 +9,18 @@ export class MainPageComponent implements OnInit {
 
   constructor() { }
 
+  errorMesageString: string = '';
+  displayErrorNotification: boolean = false;
+
+  getError(errorMessage: string): void{
+    this.errorMesageString = errorMessage;
+    this.displayErrorNotification = true;
+  }
+
+  hideErrorNotification(status: boolean){
+    this.displayErrorNotification = false;
+  }
+
   ngOnInit(): void {
   }
 

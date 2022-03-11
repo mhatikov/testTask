@@ -1,4 +1,4 @@
 <div class="content__wrap">
     <app-navigation-filters></app-navigation-filters>
-    <app-user-list></app-user-list>
+    <app-user-list (errorServer)="getError($event)"></app-user-list>
 </div>
