@@ -1,14 +1,23 @@
 <div class="navigation-menu">
     <div class="navigation-menu__wrap">
         <ul class="navigation-menu__list">
-            <li class="navigation-menu__item active">
-                <div class="navigation-menu__item-content">Все</div>
+            <li class="navigation-menu__item" data-filterSetting=""
+            [ngClass]="{active: activeFilter === null}"
+            (click)="navigate($event)">
+                <div class="navigation-menu__item-content"
+                data-filterSetting="">Все</div>
             </li>
-            <li class="navigation-menu__item">
-                <div class="navigation-menu__item-content">Заблокированные</div>
+            <li class="navigation-menu__item" data-filterSetting="2"
+            [ngClass]="{active: activeFilter === 2}"
+            (click)="navigate($event)">
+                <div class="navigation-menu__item-content"
+                data-filterSetting="2">Заблокированные</div>
             </li>
-            <li class="navigation-menu__item">
-                <div class="navigation-menu__item-content">Активные</div>
+            <li class="navigation-menu__item" data-filterSetting="0"
+            [ngClass]="{active: activeFilter === 0}"
+            (click)="navigate($event)">
+                <div class="navigation-menu__item-content"
+                data-filterSetting="0">Активные</div>
             </li>
         </ul>
     </div>
