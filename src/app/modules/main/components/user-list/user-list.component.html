@@ -1,4 +1,36 @@
-<p>user-list works!</p>
+<section class="user-list" *ngIf="!displayLoader">
+    <div class="user-list__content">
+        <ul class="user-list__items">
+            <li class="user-list__item item" *ngFor="let customer of customers; let i = index">
+                <div class="item__info">
+                    <div class="item__info-first-wrapper">
+                        <div class="item__info-img-wrap item__element">
+                            <img [src]="customer.avatar" alt="#">
+                        </div>
+                        <div class="item__info-name-wrap item__element">
+                            <div class="item__content item__info-name">{{customer.fname}} {{customer.name | charLimit: 1}} {{customer.mname | charLimit: 1}}</div>
+                        </div>
+                        <div class="item__info-balance-wrap item__element">
+                            <div class="item__content item__info-balance">Баланс: {{customer.balance}}</div>
+                        </div>
+                    </div>
+                    <div class="item__info-second-wrapper">
+                        <div class="item__info-last-update-wrap item__element">
+                            <div class="item__content item__info-last-update">Последнее изменение: {{customer.lastUpdatedAt}} секунд(ы) назад</div>
+                        </div>
+                        <div class="item__info-status-wrap item__element">
+                            <div class="item__content item__info-status">
+                                <span *ngIf="customer.status === 0">Подписка активна</span>
+                                <span *ngIf="customer.status === 1">Подписка приостановлена</span>
+                                <span *ngIf="customer.status === 2">Подписка заблокирована</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</section>
 <div class="box" *ngIf="displayLoader">
     <div class="loader6"></div>
 </div>

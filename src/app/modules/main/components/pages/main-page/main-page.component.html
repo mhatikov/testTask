@@ -1,4 +1,8 @@
 <div class="content__wrap">
     <app-navigation-filters></app-navigation-filters>
     <app-user-list (errorServer)="getError($event)"></app-user-list>
+    <div class="content__notification" 
+    [ngClass]="{display: displayErrorNotification}">
+        <app-notification-error [message]="errorMesageString" (closeWindow)="hideErrorNotification($event)"></app-notification-error>
+    </div>
 </div>

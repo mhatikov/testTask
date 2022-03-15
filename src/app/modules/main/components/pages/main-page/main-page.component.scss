@@ -1,9 +1,13 @@
 .content{
 
     &__wrap{
-        height: 100%;
-        width: 100%;
-        position: absolute;
+       min-height: 100%;
+       width: 100%;
+       position: absolute;
+    }
+
+    &__notification{
+        position: fixed;
     }
 
 }

@@ -1,8 +1,9 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { catchError, finalize, of, Subscription } from 'rxjs';
-import { setCookie } from 'src/app/models/Cookies/cookiesFunction';
+import { getCookie, setCookie } from 'src/app/models/Cookies/cookiesFunction';
 import { AuthError } from 'src/app/models/Errors/errors';
 import { User } from 'src/app/models/interfaces/user.interface';
 import { AuthService } from 'src/app/services/auth.service';
@@ -16,7 +17,7 @@ export class AuthorizationWindowComponent implements OnInit, OnDestroy {
 
   constructor(
     private _auth: AuthService,
-    private _router: Router
+    private _router: Router,
   ) { }
 
   visiblePassword: boolean = false;

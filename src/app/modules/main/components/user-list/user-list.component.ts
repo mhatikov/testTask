@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
-import { delayWhen, map, Observable, retryWhen, Subscription, switchMap, tap, timer } from 'rxjs';
+import { delayWhen, EMPTY, iif, interval, map, Observable, retryWhen, Subscription, switchMap, tap, timer } from 'rxjs';
 import { getCookie } from 'src/app/models/Cookies/cookiesFunction';
 import { ServerError } from 'src/app/models/Errors/errors';
 import { Customer } from 'src/app/models/interfaces/customer.interface';
@@ -19,51 +19,75 @@ export class UserListComponent implements OnInit, OnDestroy {
   ) { }
 
   customersStream: Subscription;
+  updateCustomersStream: Subscription;
+
   lastFilterKey: null|number;
   displayLoader: boolean = true;
+  stopAutoUpdating: boolean = true;
 
   customers: Customer[];
 
   @Output() errorServer = new EventEmitter<string>();
 
-  private _getUsersPipe$(observer: Observable<ServerError|Customer[]>): Observable<Customer[]>{
+  private _getCustomersPipe$(observer: Observable<ServerError|Customer[]>): Observable<Customer[]>{
     return observer.pipe(
       map(result => {
-        if(!Array.isArray(result)){
+        if(!Array.isArray(result)) {
+          this.errorServer.emit('Reconnect...');
           throw new ServerError(result.message);
         }
-        return result.sort((a,b) => {
-          if(a.id > b.id) return -1;
-          if(a.id < b.id) return 1;
-          return 0
-        }).reverse();
+        return this._userListService.getCustomersMap(result);
       }),
       retryWhen(err => err.pipe(
         delayWhen(() => timer(5000)),
         tap(() => {
           console.log('reconnect...');
-          this.errorServer.emit('Reconnect');
         })
       ))
     )
   }
+  private _createUpdateCustomers$(){
+   return interval(5000).pipe(
+      switchMap(() => {
+        return iif(
+          () => this.stopAutoUpdating,
+          EMPTY,
+          this._userListService.getCustomersToFiltersKey$(getCookie('authToken') as string, this.lastFilterKey),
+        )
+      }),
+      map(result => {
+        if(!Array.isArray(result) || this.stopAutoUpdating) return EMPTY;
+        return this._userListService.getCustomersMap(result);
+      })
+    )
+  }
 
   ngOnInit(): void {
-   this.customersStream = this._filtersService.filterKey$
-    .pipe(
-      tap((res) => {
-        this.displayLoader = true;
-        this.lastFilterKey = res;
-      }),
-      switchMap(key => this._getUsersPipe$(this._userListService.getUsersToFiltersKey$(getCookie('authToken') as string, key))),
-    )
-    .subscribe(customers => {
-      this.customers = customers;
-      this.displayLoader = false;
-    });
+    this.customersStream = this._filtersService.filterKey$
+      .pipe(
+        tap((res) => {
+          this.displayLoader = true;
+          this.stopAutoUpdating = true;
+          this.lastFilterKey = res;
+        }),
+        switchMap(key => this._getCustomersPipe$(this._userListService.getCustomersToFiltersKey$(getCookie('authToken') as string, key))),
+      )
+      .subscribe(customers => {
+        this.customers = customers;
+        this.displayLoader = false;
+        this.stopAutoUpdating = false;
+        console.log(this.customers);
+      });
+
+    this.updateCustomersStream = this._createUpdateCustomers$()
+      .subscribe(res =>{
+        if(Array.isArray(res)) this.customers = res;
+        console.log(res);
+      })
   }
 
   ngOnDestroy(): void {
-    this.customersStream.unsubscribe(); 
+    this.updateCustomersStream.unsubscribe();
+    this.customersStream.unsubscribe();
   }
 }
