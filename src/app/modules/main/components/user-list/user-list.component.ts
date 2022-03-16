@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { delayWhen, EMPTY, finalize, iif, interval, map, mergeWith, Observable, retryWhen, Subscription, switchMap, tap, timer } from 'rxjs';
 import { getCookie } from 'src/app/models/Cookies/cookiesFunction';
 import { ServerError } from 'src/app/models/Errors/errors';
@@ -78,37 +78,38 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.displayModalWindow = false;
   }
 
-  updateCustomer(){
+  updateCustomer(form: NgForm){
     const updateCustomer: UpdateCustomer = {
       status: this.selectedCustomer.status,
       name: this.selectedCustomer.name,
       mname: this.selectedCustomer.mname,
       fname: this.selectedCustomer.fname,
     }
-
-   this._userListService.updateCustomerFromId$(getCookie('authToken') as string, this.selectedCustomer.id, updateCustomer)
-    .pipe(
-      tap((res: any) => {
-        this.displayModalWinodwLoader = true;
-        if(res.message) {
-          this.errorServer.emit('Reupdating');
-          throw new ServerError(res.message);
-        }
-        return res;
-      }),
-      retryWhen(err => err.pipe(
-        delayWhen(() => timer(5000)),
-      )),
-      finalize(() => {
-        this.hideModalWindow();
-        this.displayModalWinodwLoader = false;
-      }
-      )
-   )
-    .subscribe(res => {
-      this.customers[this.indexSelectedCustomer] = this._userListService.getCustomersMap([res])[0];
-      console.log(res);
-    });
+    if(form.valid){
+      this._userListService.updateCustomerFromId$(getCookie('authToken') as string, this.selectedCustomer.id, updateCustomer)
+        .pipe(
+          tap((res: any) => {
+            this.displayModalWinodwLoader = true;
+            if(res.message) {
+              this.errorServer.emit('Reupdating');
+              throw new ServerError(res.message);
+            }
+            return res;
+          }),
+          retryWhen(err => err.pipe(
+            delayWhen(() => timer(5000)),
+          )),
+          finalize(() => {
+            this.hideModalWindow();
+            this.displayModalWinodwLoader = false;
+          }
+          )
+        )
+        .subscribe(res => {
+          this.customers[this.indexSelectedCustomer] = this._userListService.getCustomersMap([res])[0];
+          console.log(res);
+        });
+    }
   }
 
   ngOnInit(): void {

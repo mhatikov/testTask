@@ -180,6 +180,10 @@
 		}
 	}
 
+	input.ng-touched.ng-invalid{
+		border: 1px solid red;
+	}
+
 	&__btn-submit {
 		position: absolute;
 		bottom: 22px;
