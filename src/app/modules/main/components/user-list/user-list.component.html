@@ -1,28 +1,28 @@
 <section class="user-list" *ngIf="!displayLoader">
     <div class="user-list__content">
         <ul class="user-list__items">
-            <li class="user-list__item item" *ngFor="let customer of customers; let i = index">
+            <li class="user-list__item item" *ngFor="let customer of customers; let i = index" (click)="showModalWindow(i)">
                 <div class="item__info">
                     <div class="item__info-first-wrapper">
                         <div class="item__info-img-wrap item__element">
                             <img [src]="customer.avatar" alt="#">
                         </div>
                         <div class="item__info-name-wrap item__element">
-                            <div class="item__content item__info-name">{{customer.fname}} {{customer.name | charLimit: 1}} {{customer.mname | charLimit: 1}}</div>
+                            <h2 class="item__content item__info-name">{{customer.fname}} {{customer.name | charLimit: 1}} {{customer.mname | charLimit: 1}}</h2>
                         </div>
                         <div class="item__info-balance-wrap item__element">
-                            <div class="item__content item__info-balance">Баланс: {{customer.balance}}</div>
+                            <h3 class="item__content item__info-balance">Баланс: {{customer.balance}}</h3>
                         </div>
                     </div>
                     <div class="item__info-second-wrapper">
                         <div class="item__info-last-update-wrap item__element">
-                            <div class="item__content item__info-last-update">Последнее изменение: {{customer.lastUpdatedAt}} секунд(ы) назад</div>
+                            <h4 class="item__content item__info-last-update">Последнее изменение: {{customer.lastUpdatedAt}} секунд(ы) назад</h4>
                         </div>
                         <div class="item__info-status-wrap item__element">
                             <div class="item__content item__info-status">
-                                <span *ngIf="customer.status === 0">Подписка активна</span>
-                                <span *ngIf="customer.status === 1">Подписка приостановлена</span>
-                                <span *ngIf="customer.status === 2">Подписка заблокирована</span>
+                                <span *ngIf="customer.status == 0">Подписка активна</span>
+                                <span *ngIf="customer.status == 1">Подписка приостановлена</span>
+                                <span *ngIf="customer.status == 2">Подписка заблокирована</span>
                             </div>
                         </div>
                     </div>
@@ -31,6 +31,41 @@
         </ul>
     </div>
 </section>
+<section class="modal-window" *ngIf="selectedCustomer">
+    <div class="modal-window__wrap" [ngClass]="{'display': displayModalWindow}">
+        <div class="modal-window__body">
+            <form action="#" #updateCustomerForm="ngForm" *ngIf="!displayModalWinodwLoader">
+                <div class="modal-window__header">
+                    <h2 class="modal-window__header-name">{{selectedCustomer.name}} {{selectedCustomer.fname}}</h2>
+                    <button type="button" class="modal-window__header-close-btn" (click)="hideModalWindow()"></button>
+                </div>
+                <div class="modal-window__content">
+                    <input type="text" name="fname" id="fnameInput" class="modal-window__data-input" placeholder="Фамилия"
+                    [(ngModel)]="selectedCustomer.fname"
+                    required>
+                    <input type="text" name="name" id="nameInput" class="modal-window__data-input" placeholder="Имя"
+                    [(ngModel)]="selectedCustomer.name"
+                    required>
+                    <input type="text" name="mname" id="mnameInput" class="modal-window__data-input" placeholder="Отчество"
+                    [(ngModel)]="selectedCustomer.mname"
+                    required>
+                    <select type="text" name="status" id="statusSelect" class="modal-window__data-input"
+                    [(ngModel)]="selectedCustomer.status"
+                    required>
+                        <option value="0" class="modal-window__data-option">Подписка активна</option>
+                        <option value="1" class="modal-window__data-option">Подписка приостановлена</option>
+                        <option value="2" class="modal-window__data-option">Подписка заблокирована</option>
+                    </select>
+                </div>
+                <button type="button" class="modal-window__btn-submit" (click)="updateCustomer()">Сохранить</button>
+            </form>
+            <div class="box" *ngIf="displayModalWinodwLoader">
+                <div class="loader6"></div>
+            </div>
+        </div>
+    </div>
+</section>
 <div class="box" *ngIf="displayLoader">
     <div class="loader6"></div>
 </div>
+<div class="modal-window__shading" [ngClass]="{'display': displayModalWindow}" *ngIf="selectedCustomer"></div>

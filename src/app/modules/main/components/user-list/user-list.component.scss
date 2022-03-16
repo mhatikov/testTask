@@ -69,30 +69,134 @@
 		}
 	}
 
-	&__info-name-wrap {
-	}
-
-	&__info-name {
-	}
-
-	&__info-balance-wrap {
-	}
-
-	&__info-balance {
-	}
-
-	&__info-last-update-wrap {
-	}
-
 	&__info-last-update {
 		font-size: 13px;
 		color: #A8A8A8;
 	}
 
-	&__info-status-wrap {
+}
+
+.modal-window {
+
+	&__wrap {
+		position: fixed;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: -5;
+		opacity: 0;
+		transition: all ease 0.4s;
+		&.display{
+			opacity: 1;
+			transition: all ease 0.2s;
+			z-index: 5;
+		}
 	}
 
-	&__info-status {
+	&__body {
+		width: 63%;
+		height: 55%;
+		background-color: white;
+		box-shadow: 0px 7px 64px rgba(0, 0, 0, 0.07);
+		border-radius: 12px;
+		position: relative;
+	}
+
+	&__shading {
+		position: fixed;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		background-color: rgba(63, 51, 86, 0.4);
+		z-index: -4;
+		opacity: 0;
+		transition: all ease 0.2s;
+		display: block;
+		&.display{
+			z-index: 4;
+			opacity: 1;
+			transition: all ease 0.4s;
+		}
+	}
+
+	&__header {
+		padding: 20px;
+		border-bottom: 1px solid #ECEBED;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	&__header-name {
+		font-family: 'Inter';
+		font-style: normal;
+		font-weight: 700;
+		font-size: 34px;
+		line-height: 41px;
+	}
+
+	&__header-close-btn {
+		width: 25px;
+		height: 5px;
+		background-color: #6979F8;
+		border-radius: 3px;
+		transform: rotate(45deg);
+		position: relative;
+		cursor: pointer;
+		&::before{
+			content: "";
+			width: 25px;
+			height: 5px;
+			background-color: #6979F8;
+			border-radius: 2px;
+			transform: rotate(90deg);
+			display: block;
+		}
+	}
+
+	&__content {
+		display: flex;
+		flex-wrap: wrap;
+		padding: 34px;
+		justify-content: flex-start;
+	}
+
+	&__data-input {
+		padding: 14px;
+		border: 1px solid #ECEBED;
+		border-radius: 6px;
+		width: 240px;
+		margin: 0px 28px 28px 0px;
+		font-family: 'Inter';
+		font-style: normal;
+		font-weight: 400;
+		font-size: 15px;
+		line-height: 20px;
+		&:focus:not(button){
+			border: 1px solid #a9a8aa;
+		}
+	}
+
+	&__btn-submit {
+		position: absolute;
+		bottom: 22px;
+		right: 22px;
+		background: #6979F8;
+		border-radius: 6px;
+		width: 180px;
+		height: 40px;
+		font-family: 'Inter';
+		font-style: normal;
+		font-weight: 500;
+		font-size: 13px;
+		line-height: 18px;
+		color: white;
+		&:hover{
+			background: #5565db;
+		}
 	}
 }
 

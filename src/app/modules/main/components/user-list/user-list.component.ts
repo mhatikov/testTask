@@ -1,10 +1,12 @@
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
-import { delayWhen, EMPTY, iif, interval, map, Observable, retryWhen, Subscription, switchMap, tap, timer } from 'rxjs';
+import { delayWhen, EMPTY, finalize, iif, interval, map, mergeWith, Observable, retryWhen, Subscription, switchMap, tap, timer } from 'rxjs';
 import { getCookie } from 'src/app/models/Cookies/cookiesFunction';
 import { ServerError } from 'src/app/models/Errors/errors';
 import { Customer } from 'src/app/models/interfaces/customer.interface';
 import { FiltersService } from 'src/app/services/filters.service';
 import { UserListService } from 'src/app/services/user-list.service';
+import { NgForm } from '@angular/forms';
+import { UpdateCustomer } from 'src/app/models/interfaces/updateCustomer.interface';
 
 @Component({
   selector: 'app-user-list',
@@ -15,17 +17,21 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   constructor(
     private _userListService: UserListService,
-    private _filtersService: FiltersService,
+    private _filtersService: FiltersService
   ) { }
 
   customersStream: Subscription;
-  updateCustomersStream: Subscription;
+  updateCustomerStream: Subscription;
 
   lastFilterKey: null|number;
   displayLoader: boolean = true;
-  stopAutoUpdating: boolean = true;
+  stopAutoReconnect: boolean = true;
+  displayModalWindow: boolean = false;
+  displayModalWinodwLoader: boolean = false;
 
   customers: Customer[];
+  selectedCustomer: Customer;
+  indexSelectedCustomer: number;
 
   @Output() errorServer = new EventEmitter<string>();
 
@@ -40,26 +46,69 @@ export class UserListComponent implements OnInit, OnDestroy {
       }),
       retryWhen(err => err.pipe(
         delayWhen(() => timer(5000)),
-        tap(() => {
-          console.log('reconnect...');
-        })
-      ))
+      )),
     )
   }
-  private _createUpdateCustomers$(){
+
+  private _createAutoReconnectionCustomers$(){
    return interval(5000).pipe(
       switchMap(() => {
         return iif(
-          () => this.stopAutoUpdating,
+          () => this.stopAutoReconnect,
           EMPTY,
           this._userListService.getCustomersToFiltersKey$(getCookie('authToken') as string, this.lastFilterKey),
         )
       }),
       map(result => {
-        if(!Array.isArray(result) || this.stopAutoUpdating) return EMPTY;
+        if(!Array.isArray(result) || this.stopAutoReconnect) return EMPTY;
         return this._userListService.getCustomersMap(result);
       })
     )
+  }
+
+  showModalWindow(indexCustomer: number){
+    this.stopAutoReconnect = true;
+    this.displayModalWindow = true;
+    this.indexSelectedCustomer = indexCustomer;
+    this.selectedCustomer = JSON.parse(JSON.stringify(this.customers[indexCustomer]));
+  }
+
+  hideModalWindow(){
+    this.stopAutoReconnect = false;
+    this.displayModalWindow = false;
+  }
+
+  updateCustomer(){
+    const updateCustomer: UpdateCustomer = {
+      status: this.selectedCustomer.status,
+      name: this.selectedCustomer.name,
+      mname: this.selectedCustomer.mname,
+      fname: this.selectedCustomer.fname,
+    }
+
+   this._userListService.updateCustomerFromId$(getCookie('authToken') as string, this.selectedCustomer.id, updateCustomer)
+    .pipe(
+      tap((res: any) => {
+        this.displayModalWinodwLoader = true;
+        if(res.message) {
+          this.errorServer.emit('Reupdating');
+          throw new ServerError(res.message);
+        }
+        return res;
+      }),
+      retryWhen(err => err.pipe(
+        delayWhen(() => timer(5000)),
+      )),
+      finalize(() => {
+        this.hideModalWindow();
+        this.displayModalWinodwLoader = false;
+      }
+      )
+   )
+    .subscribe(res => {
+      this.customers[this.indexSelectedCustomer] = this._userListService.getCustomersMap([res])[0];
+      console.log(res);
+    });
   }
 
   ngOnInit(): void {
@@ -67,27 +116,22 @@ export class UserListComponent implements OnInit, OnDestroy {
       .pipe(
         tap((res) => {
           this.displayLoader = true;
-          this.stopAutoUpdating = true;
+          this.stopAutoReconnect = true;
           this.lastFilterKey = res;
         }),
         switchMap(key => this._getCustomersPipe$(this._userListService.getCustomersToFiltersKey$(getCookie('authToken') as string, key))),
+        mergeWith(this._createAutoReconnectionCustomers$()),
       )
       .subscribe(customers => {
-        this.customers = customers;
+        if(Array.isArray(customers)) this.customers = customers;
         this.displayLoader = false;
-        this.stopAutoUpdating = false;
+        this.stopAutoReconnect = false;
         console.log(this.customers);
       });
-
-    this.updateCustomersStream = this._createUpdateCustomers$()
-      .subscribe(res =>{
-        if(Array.isArray(res)) this.customers = res;
-        console.log(res);
-      })
   }
 
   ngOnDestroy(): void {
-    this.updateCustomersStream.unsubscribe();
     this.customersStream.unsubscribe();
+    if(this.updateCustomerStream) this.updateCustomerStream.unsubscribe();
   }
 }

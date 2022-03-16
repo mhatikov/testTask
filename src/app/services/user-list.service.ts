@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { delayWhen, EMPTY, map, Observable, retryWhen, tap, timer } from 'rxjs';
+import { Observable } from 'rxjs';
 import { HTTP_CUSTOMERS } from '../models/Constants/Addresses';
 import { ServerError } from '../models/Errors/errors';
 import { Customer } from '../models/interfaces/customer.interface';
+import { UpdateCustomer } from '../models/interfaces/updateCustomer.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -42,6 +43,15 @@ export class UserListService {
     if(filtersKey === 0) return this.getAllActiveCustomersList$(token);
     if(filtersKey === 2) return this.getAllBlockedCustomersList$(token);
     return this.getAllCustomersList$(token);
+  }
+
+  updateCustomerFromId$(token: string,id: number, data: UpdateCustomer){
+    const json = JSON.stringify(data);
+    return this._http.patch(`${HTTP_CUSTOMERS}/${id}`, json, {
+      headers: {
+        Authorization: token,
+      }
+    });
   }
 
   getCustomersMap(res: Customer[]){
